@@ -2,6 +2,38 @@
 import { ref } from "vue";
 
 const showForm = ref(false);
+const newMemo = ref("");
+const memos = ref([]);
+const errorMassage = ref("");
+
+function addMemo() {
+  if (!newMemo.value.trim()) {
+    errorMassage.value = "Please enter a memo.";
+    return;
+  }
+  errorMassage.value = "";
+  memos.value.push({
+    id: Date.now(),
+    content: newMemo.value,
+    date: new Date().toLocaleDateString("en-us"),
+    backgroundColor: getRandomColor(),
+  });
+  newMemo.value = "";
+  showForm.value = false;
+}
+
+function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function deleteMemo(id) {
+  memos.value = memos.value.filter((memo) => memo.id !== id);
+}
 </script>
 
 <template>
@@ -12,34 +44,30 @@ const showForm = ref(false);
         <button @click="showForm = true" class="add">+</button>
       </header>
       <div class="card-container">
-        <div class="card">
-          <p>
-            This is a simple memo app built with Vue.js. Click the "+" button to
-            add a new memo.
-          </p>
-          <p class="card-date">12/12/2022</p>
-        </div>
-        <div class="card">
-          <p>
-            This is a simple memo app built with Vue.js. Click the "+" button to
-            add a new memo.
-          </p>
-          <p class="card-date">12/12/2022</p>
-        </div>
-        <div class="card">
-          <p>
-            This is a simple memo app built with Vue.js. Click the "+" button to
-            add a new memo.
-          </p>
-          <p class="card-date">12/12/2022</p>
+        <div
+          class="card"
+          v-for="memos in memos"
+          :key="memos.id"
+          :style="{ backgroundColor: memos.backgroundColor }"
+        >
+          <p>{{ memos.content }}</p>
+          <p class="card-date">{{ memos.date }}</p>
+          <button @click="deleteMemo(memos.id)" class="card-delete">x</button>
         </div>
       </div>
     </div>
     <div v-if="showForm" class="form-container">
       <div class="form-model">
         <button @click="showForm = false" class="form-close">X</button>
-        <textarea name="memo" id="memo" cols="30" rows="20"></textarea>
-        <button class="form-input">Add</button>
+        <p v-if="errorMassage" class="form-error">{{ errorMassage }}</p>
+        <textarea
+          v-model="newMemo"
+          name="memo"
+          id="memo"
+          cols="30"
+          rows="20"
+        ></textarea>
+        <button @click="addMemo" class="form-input">Add</button>
       </div>
     </div>
   </main>
@@ -85,10 +113,11 @@ h1 {
 .card {
   height: 225px;
   width: 225px;
-  background-color: #f43253;
   padding: 20px;
   margin-top: 20px;
   position: relative;
+  font-weight: bold;
+  color: white;
 }
 .card-date {
   font-size: 12px;
@@ -151,6 +180,33 @@ h1 {
   font-weight: bold;
 }
 .form-input:hover {
-  background-color: #45a049;
+  background-color: #4caf;
+}
+.add:hover {
+  background-color: #4caf;
+}
+.form-error {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.card-delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: transparent;
+  border: none;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+}
+.card-delete:hover {
+  color: red;
+  transition: color 0.3s ease;
+}
+.form-close:hover {
+  color: red;
+  transition: color 0.3s ease;
 }
 </style>
